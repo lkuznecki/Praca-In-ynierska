@@ -1,0 +1,162 @@
+﻿@model MojSwiat2.Models.Order
+@using MojSwiat2.Utility
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{ ViewData["Title"] = "Order Details"; }
+@{ List<Products> products = HttpContextAccessor.HttpContext.Session.Get<List<Products>>("products");
+
+                if (products == null)
+                {
+                    products = new List<Products>();
+                } }
+<br />
+
+<h2 class="text-info">Order Details</h2>
+<form asp-action="Checkout" method="post" enctype="multipart/form-data">
+    <div class="p-4 rounded border row">
+        <div asp-validation-summary="ModelOnly" class="text-danger">
+
+        </div>
+        <div class="col-6">
+            <div class="form-group row">
+                <div class="col-4">
+                    <label asp-for="Name">Imię</label>
+                </div>
+                <div class="col-8">
+                    <input type="hidden" asp-for="Id" />
+                    <input asp-for="Name" class="form-control" />
+                    <span asp-validation-for="Name" class="text-danger"></span>
+                </div>
+
+            </div>
+            <div class="form-group row">
+                <div class="col-4">
+                    <label asp-for="PhoneNo">Numer Telefonu</label>
+                </div>
+                <div class="col-8">
+                    <input asp-for="PhoneNo" class="form-control" />
+                    <span asp-validation-for="PhoneNo" class="text-danger"></span>
+                </div>
+
+            </div>
+
+            <div class="form-group row">
+                <div class="col-4">
+                    <label asp-for="Address">Adres</label>
+                </div>
+                <div class="col-8">
+                    <input asp-for="Address" class="form-control" />
+                    <span asp-validation-for="Address" class="text-danger"></span>
+                </div>
+
+            </div>
+            <div class="form-group row">
+                <div class="col-4">
+                    <label asp-for="Email"></label>
+                </div>
+                <div class="col-8">
+                    @*<select asp-for="ProductTypeId" asp-items="ViewBag.productTypeId" class="form-control"></select>*@
+                    <input asp-for="Email" class="form-control" />
+                    <span asp-validation-for="Email" class="text-danger"></span>
+                </div>
+
+            </div>
+            <div class="form-group row">
+                <div class="col-4">
+                    <label asp-for="OrderDate">Data Zamówienia</label>
+                </div>
+                <div class="col-8">
+                    @*<select asp-for="SpecialTagId" asp-items="ViewBag.TagId" class="form-control"></select>*@
+                    <input asp-for="OrderDate" class="form-control" />
+                    <span asp-validation-for="OrderDate" class="text-danger"></span>
+                </div>
+
+            </div>
+            <div class="form-group row">
+                <div class="col-4">
+                    <label>Metoda Płatności</label>
+                </div>
+                <div class="col-8">
+                    <select name="PaymentMethod" id="PaymentMethod">
+                        <option value="CreditCard">Karta Kredytowa</option>
+                        <option value="Cash">Gotówka</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group row">
+                <div class="col-4">
+                    <label>Metoda Dostawy</label>
+                </div>
+                <div class="col-8">
+                    <select name="DeliveryMethod" id="DeliveryMethod">
+                        <option value="Kurier">Kurier</option>
+                        <option value="Osobisty">Odbiór osobisty</option>
+                        <option value="Poczta">Odbiór na poczcie</option>
+                        <option value="Paczkomat">Paczkomat</option>
+                    </select>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="col-6">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Artykuł</th>
+                        <th>Nazwa</th>
+                        <th>Cena</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in products)
+                    {
+                        <tr>
+                            <td>
+                                <img src="~/@item.Image" height="100px" width="150px" />
+                            </td>
+                            <td>@item.Name</td>
+                            <td>@item.Price</td>
+                        </tr>}
+                </tbody>
+            </table>
+            <div class="text-right">
+                <h3>Do zapłaty : @products.Sum(c => c.Price)</h3>
+            </div>
+            <div class="form-group text-right">
+                <input type="submit" value="Złóż zamówienie" class="btn btn-success" />
+            </div>
+
+
+        </div>
+
+
+
+    </div>
+</form>
+<form method="post" action="https://secure.payu.com/api/v2_1/orders">
+    <input type="hidden" name="continueUrl" value="http://shop.url/continue">
+    <input type="hidden" name="currencyCode" value="PLN">
+    <input type="hidden" name="customerIp" value="123.123.123.123">
+    <input type="hidden" name="description" value="Order description">
+    <input type="hidden" name="merchantPosId" value="145227">
+    <input type="hidden" name="notifyUrl" value="http://shop.url/notify">
+    <input type="hidden" name="products[0].name" value="Product 1">
+    <input type="hidden" name="products[0].quantity" value="1">
+    <input type="hidden" name="products[0].unitPrice" value="1000">
+    <input type="hidden" name="totalAmount" value="1000">
+    <input type="hidden" name="OpenPayu-Signature" value="sender=145227;algorithm=SHA-256;signature=bc94a8026d6032b5e216be112a5fb7544e66e23e68d44b4283ff495bdb3983a8">
+    <button type="submit" formtarget="_blank">Zapłać przez PayU</button>
+</form>
+
+@section Scripts{
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>$(document).ready(function() {
+                $("#OrderDate").datepicker({
+                showAnim: "slide",
+                changeMonth: true,
+                changeYear:true
+                });
+            });
+    </script>
+}

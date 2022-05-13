@@ -1,0 +1,115 @@
+﻿@model MojSwiat2.Models.Products
+@using MojSwiat2.Utility
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    List<Products> products = HttpContextAccessor.HttpContext.Session.Get<List<Products>>("products");
+    Products product = null;
+    if (products != null)
+    {
+        product = products.FirstOrDefault(c => c.Id == Model.Id);
+    }
+}
+
+@{
+    ViewData["Title"] = "Detail";
+}
+
+<br />
+<h2 class="text-info"> Product Details</h2>
+<form asp-action="Detail" method="post" enctype="multipart/form-data">
+    <div class="p-4" style="border-radius: 5px;border: 1px solid #0c0d0d">
+        <div asp-validation-summary="ModelOnly" class="text-danger">
+
+        </div>
+        <div class="col-12">
+            <div class="float-right">
+                <img src="~/@Model.Image" width="100%" height="250px" style="border-radius: 5px;border: 1px solid #0c0d0d" />
+                @if (Model.IsAvailable)
+                {
+                    <img src="~/Images/checkmark.jpg" width="50px" height="50px" />
+                }
+                else
+                {
+                    <img src="~/Images/unaviable.jpg" width="50px" height="50px" />
+                }
+
+            </div>
+        </div>
+        <div class="col-8">
+            <div class="form-group row">
+                <div class="col-4">
+                    <label asp-for="Name">Nazwa</label>
+                </div>
+                <div class="col-8">
+                    <input type="hidden" asp-for="Id" />
+                    <input asp-for="Name" readonly="readonly" class="form-control" />
+                </div>
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+            <div class="form-group row">
+                <div class="col-4">
+                    <label asp-for="Price">Cena</label>
+                </div>
+                <div class="col-8">
+                    <input asp-for="Price" readonly="readonly" class="form-control" />
+                </div>
+                <span asp-validation-for="Price" class="text-danger"></span>
+            </div>
+
+            @*<div class="form-group row">
+                    <div class="col-4">
+                        <label asp-for="Image"></label>
+                    </div>
+                    <div class="col-8">
+                        <input asp-for="Image" class="form-control" type="file" />
+                    </div>
+                    <span asp-validation-for="Image" class="text-danger"></span>
+                </div>*@
+            <div class="form-group row">
+                <div class="col-4">
+                    <label asp-for="ProductColor">Kolor</label>
+                </div>
+                <div class="col-8">
+                    <input asp-for="ProductColor" readonly="readonly" class="form-control" />
+                </div>
+                <span asp-validation-for="ProductColor" class="text-danger"></span>
+            </div>
+            <div class="form-group row">
+                <div class="col-4">
+                    <label asp-for="ProductTypeId">Id Typu produktu</label>
+                </div>
+                <div class="col-8">
+                    @*<select asp-for="ProductTypeId" asp-items="ViewBag.productTypeId" class="form-control"></select>*@
+                    <input asp-for="ProductTypeId" readonly="readonly" class="form-control" />
+                </div>
+                <span asp-validation-for="ProductTypeId" class="text-danger"></span>
+            </div>
+
+            <div class="form-group row">
+                <div class="col-4">
+
+                </div>
+                <div class="col-8">
+                    @if (product != null)
+                    {
+                        <button type="submit" class="btn btn-danger form-control" asp-action="Remove" asp-route-id="@Model.Id">Usuń z koszyka</button>
+                    }
+                    else
+                    {
+                        <input type="submit" class="btn btn-info form-control" value="Dodaj do koszyka" />
+                    }
+                </div>
+
+            </div>
+            <div class="form-group">
+                <a asp-action="Index" class="btn btn-success">Wróć do katalogu</a>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section Scripts{
+    @{await Html.RenderPartialAsync(partialViewName: "_ValidationScriptsPartial");}
+    <script src="~/lib/jquery-validation/dist/jQueryFixes.js"></script>
+}
